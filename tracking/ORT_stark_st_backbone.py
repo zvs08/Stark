@@ -82,7 +82,7 @@ if __name__ == "__main__":
     if load_checkpoint:
         save_dir = env_settings().save_dir
         checkpoint_name = os.path.join(save_dir,
-                                       "checkpoints/train/%s/%s/STARKST_ep0004.pth.tar"
+                                       "checkpoints/train/%s/%s/STARKST_ep0007.pth.tar"
                                        % (args.script, args.config))
         model.load_state_dict(torch.load(checkpoint_name, map_location='cpu')['net'], strict=True)
     # transfer to test mode
