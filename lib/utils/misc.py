@@ -15,6 +15,7 @@ from typing import Optional, List
 import torch
 import torch.distributed as dist
 from torch import Tensor
+import torch.nn as nn
 
 # needed due to empty tensor bug in pytorch and torchvision 0.5
 import torchvision
@@ -281,7 +282,7 @@ def _max_by_axis(the_list):
     return maxes
 
 
-class NestedTensor(object):
+class NestedTensor(nn.Module):
     def __init__(self, tensors, mask: Optional[Tensor]):
         self.tensors = tensors
         self.mask = mask
