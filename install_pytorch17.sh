@@ -1,5 +1,5 @@
 echo "****************** Installing pytorch ******************"
-conda install -y pytorch==1.7.0 torchvision==0.8.1 cudatoolkit=10.2 -c pytorch
+conda install pytorch==1.10.2 torchvision==0.11.2 torchaudio==0.10.2 cudatoolkit=10.2 -c pytorch
 
 echo ""
 echo ""
@@ -90,7 +90,10 @@ pip install onnx onnxruntime-gpu==1.6.0
 echo ""
 echo ""
 echo "****************** Installing timm ******************"
-pip install timm==0.3.2
+pip install timm==0.4.12
+
+pip install tensorboardX
+pip install yacs
 
 echo ""
 echo ""
