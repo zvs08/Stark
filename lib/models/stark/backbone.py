@@ -4,10 +4,10 @@ Backbone modules.
 
 import torch
 import torch.nn.functional as F
-from torch import nn
+from torch import nn, Tensor
 from torchvision.models._utils import IntermediateLayerGetter
 from typing import Dict, List
-from lib.utils.misc import NestedTensor, is_main_process
+from lib.utils.misc import is_main_process
 from .position_encoding import build_position_encoding
 from lib.models.stark import resnet as resnet_module
 from lib.models.stark.repvgg import get_RepVGG_func_by_name
@@ -79,14 +79,14 @@ class BackboneBase(nn.Module):
         self.body = IntermediateLayerGetter(backbone, return_layers=return_layers)  # method in torchvision
         self.num_channels = num_channels
 
-    def forward(self, tensor_list: NestedTensor):
-        xs = self.body(tensor_list.tensors)
-        out: Dict[str, NestedTensor] = {}
+    def forward(self, tensors: Tensor, mask: Tensor):
+        xs = self.body(tensors)
+        out: Dict[str, Dict[str, Tensor]] = {}
         for name, x in xs.items():
-            m = tensor_list.mask
+            m = mask
             assert m is not None
             mask = F.interpolate(m[None].float(), size=x.shape[-2:]).to(torch.bool)[0]
-            out[name] = NestedTensor(x, mask)
+            out[name] = {'tensors': x, 'mask': mask}
         return out
 
 
@@ -129,9 +129,9 @@ class Joiner(nn.Sequential):
     def __init__(self, backbone, position_embedding):
         super().__init__(backbone, position_embedding)
 
-    def forward(self, tensor_list: NestedTensor):
+    def forward(self, tensor_list: Dict[str, Tensor]):
         xs = self[0](tensor_list)
-        out: List[NestedTensor] = []
+        out: List[Dict[str, Tensor]] = []
         pos = []
         for name, x in xs.items():
             out.append(x)
@@ -164,9 +164,9 @@ class Joiner_NOPE(nn.Sequential):
     def __init__(self, backbone):
         super().__init__(backbone)
 
-    def forward(self, tensor_list: NestedTensor, mode=None):
+    def forward(self, tensor_list: Dict[str, Tensor], mode=None):
         xs = self[0](tensor_list)
-        out: List[NestedTensor] = []
+        out: List[Dict[str, Tensor]] = []
         for name, x in xs.items():
             out.append(x)
         return out

@@ -288,7 +288,7 @@ class NestedTensor(nn.Module):
         self.mask = mask
 
     def to(self, device):
-        # type: (Device) -> NestedTensor # noqa
+        # type: (Device) -> Dict[str, Tensor] # noqa
         cast_tensor = self.tensors.to(device)
         mask = self.mask
         if mask is not None:
@@ -296,10 +296,7 @@ class NestedTensor(nn.Module):
             cast_mask = mask.to(device)
         else:
             cast_mask = None
-        return NestedTensor(cast_tensor, cast_mask)
-
-    def decompose(self):
-        return self.tensors, self.mask
+        return {'tensors': cast_tensor, 'mask': cast_mask}
 
     def __repr__(self):
         return str(self.tensors)

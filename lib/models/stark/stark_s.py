@@ -2,9 +2,8 @@
 Basic STARK Model (Spatial-only).
 """
 import torch
-from torch import nn
-
-from lib.utils.misc import NestedTensor
+from torch import nn, Tensor
+from typing import Dict
 
 from .backbone import build_backbone
 from .transformer import build_transformer
@@ -45,12 +44,12 @@ class STARKS(nn.Module):
         else:
             raise ValueError
 
-    def forward_backbone(self, input: NestedTensor):
+    def forward_backbone(self, input: Dict[str, Tensor]):
         """The input type is NestedTensor, which consists of:
                - tensor: batched images, of shape [batch_size x 3 x H x W]
                - mask: a binary mask of shape [batch_size x H x W], containing 1 on padded pixels
         """
-        assert isinstance(input, NestedTensor)
+        assert isinstance(input, Dict)
         # Forward the backbone
         output_back, pos = self.backbone(input)  # features & masks, position embedding for the search
         # Adjust the shapes
@@ -94,7 +93,7 @@ class STARKS(nn.Module):
     def adjust(self, output_back: list, pos_embed: list):
         """
         """
-        src_feat, mask = output_back[-1].decompose()
+        src_feat, mask = [output_back[-1]['tensors'], output_back[-1]['mask']]
         assert mask is not None
         # reduce channel
         feat = self.bottleneck(src_feat)  # (B, C, H, W)

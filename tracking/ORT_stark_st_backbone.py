@@ -8,8 +8,6 @@ import torch.onnx
 import os
 from lib.test.evaluation.environment import env_settings
 from torch.utils.mobile_optimizer import optimize_for_mobile
-from lib.utils.misc import NestedTensor
-import collections.abc as container_abcs
 
 
 # img_arr (H,W,3)
@@ -23,7 +21,7 @@ def process(img_arr, amask_arr):
     img_tensor_norm = ((img_tensor / 255.0) - mean) / std  # (1,3,H,W)
     # Deal with the attention mask
     amask_tensor = amask_arr.unsqueeze(dim=0)  # (1,H,W)
-    return NestedTensor(img_tensor_norm, amask_tensor)
+    return {'tensors': img_tensor_norm, 'mask': amask_tensor}
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Parse args for training')
@@ -50,7 +48,7 @@ class Backbone_Bottleneck(nn.Module):
     def forward(self, img_arr:torch.Tensor, amask_arr:torch.Tensor):
         input = process(img_arr, amask_arr)
         output_back, pos = self.backbone(input)
-        src_feat, mask = output_back[-1].decompose()
+        src_feat, mask = [output_back[-1]['tensors'], output_back[-1]['mask']]
         assert mask is not None
         # reduce channel
         feat = self.bottleneck(src_feat)  # (B, C, H, W)
