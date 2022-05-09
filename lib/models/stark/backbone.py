@@ -79,11 +79,11 @@ class BackboneBase(nn.Module):
         self.body = IntermediateLayerGetter(backbone, return_layers=return_layers)  # method in torchvision
         self.num_channels = num_channels
 
-    def forward(self, tensors: Tensor, mask: Tensor):
-        xs = self.body(tensors)
+    def forward(self, tensor_list: Dict[str, Tensor]):
+        xs = self.body(tensor_list['tensors'])
         out: Dict[str, Dict[str, Tensor]] = {}
         for name, x in xs.items():
-            m = mask
+            m = tensor_list['mask']
             assert m is not None
             mask = F.interpolate(m[None].float(), size=x.shape[-2:]).to(torch.bool)[0]
             out[name] = {'tensors': x, 'mask': mask}
