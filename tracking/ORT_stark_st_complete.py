@@ -134,6 +134,7 @@ if __name__ == "__main__":
     torchscript_model = torch.jit.script(torch_model)
     torchscript_model_optimized = optimize_for_mobile(torchscript_model)
     torch.jit.save(torchscript_model_optimized, "stark_st_transformer.pt")
+    torchscript_model_optimized._save_for_lite_interpreter("stark_st_transformer.ptl")
     '''
     # get the network input
     bs = 1
