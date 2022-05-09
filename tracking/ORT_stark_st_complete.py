@@ -89,10 +89,9 @@ def to_numpy(tensor):
 
 if __name__ == "__main__":
     load_checkpoint = True
-    save_name = "complete.onnx"
     # update cfg
-    args = parse_args()
-    yaml_fname = 'experiments/stark_st2/%s.yaml' % (args.config)
+    config = 'baseline'
+    yaml_fname = 'experiments/stark_st2/%s.yaml' % config
     print(yaml_fname)
     update_config_from_file(yaml_fname)
     bs = 1
@@ -104,7 +103,7 @@ if __name__ == "__main__":
         save_dir = env_settings().save_dir
         checkpoint_name = os.path.join(save_dir,
                                        "checkpoints/train/stark_st2/%s/STARKST_ep0007.pth.tar"
-                                       % (args.config))
+                                       % config)
         model.load_state_dict(torch.load(checkpoint_name, map_location='cpu')['net'], strict=True)
     # transfer to test mode
     model = repvgg_model_convert(model)
