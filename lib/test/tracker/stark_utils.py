@@ -1,7 +1,5 @@
 import torch
 import numpy as np
-from lib.utils.misc import NestedTensor
-
 
 class Preprocessor(object):
     def __init__(self):
@@ -14,7 +12,7 @@ class Preprocessor(object):
         img_tensor_norm = ((img_tensor / 255.0) - self.mean) / self.std  # (1,3,H,W)
         # Deal with the attention mask
         amask_tensor = torch.from_numpy(amask_arr).to(torch.bool).cuda().unsqueeze(dim=0)  # (1,H,W)
-        return NestedTensor(img_tensor_norm, amask_tensor)
+        return {'tensors': img_tensor_norm, 'mask': amask_tensor}
 
 
 class PreprocessorX(object):

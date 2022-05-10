@@ -1,5 +1,4 @@
 from . import BaseActor
-from lib.utils.misc import NestedTensor
 from lib.utils.box_ops import box_cxcywh_to_xyxy, box_xywh_to_xyxy
 import torch
 from lib.utils.merge import merge_template_search
@@ -40,12 +39,12 @@ class STARKSActor(BaseActor):
         for i in range(self.settings.num_template):
             template_img_i = data['template_images'][i].view(-1, *data['template_images'].shape[2:])  # (batch, 3, 128, 128)
             template_att_i = data['template_att'][i].view(-1, *data['template_att'].shape[2:])  # (batch, 128, 128)
-            feat_dict_list.append(self.net(img=NestedTensor(template_img_i, template_att_i), mode='backbone'))
+            feat_dict_list.append(self.net(img={'tensors': template_img_i, 'mask': template_att_i}, mode='backbone'))
 
         # process the search regions (t-th frame)
         search_img = data['search_images'].view(-1, *data['search_images'].shape[2:])  # (batch, 3, 320, 320)
         search_att = data['search_att'].view(-1, *data['search_att'].shape[2:])  # (batch, 320, 320)
-        feat_dict_list.append(self.net(img=NestedTensor(search_img, search_att), mode='backbone'))
+        feat_dict_list.append(self.net(img={'tensors': search_img, 'mask': search_att}, mode='backbone'))
 
         # run the transformer and compute losses
         seq_dict = merge_template_search(feat_dict_list)

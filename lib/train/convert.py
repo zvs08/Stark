@@ -15,7 +15,6 @@ import lib.train.admin.settings as ws_settings
 from lib.train.base_functions import *
 from lib.models.stark import build_starks, build_starkst
 from lib.test.parameter.stark_st import parameters
-from lib.utils.misc import NestedTensor
 
 def init_seeds(seed):
     random.seed(seed)
@@ -125,7 +124,7 @@ def export(trained_model, out_dir):
         os.makedirs("%s" % out_dir)
 
     # Export the trained model to ONNX
-    dummy_input = NestedTensor(Variable(torch.randn(4, 3, 128, 128)), Variable(torch.randn(4, 128, 128))) # one black and white 28 x 28 picture will be the input to the model
+    dummy_input = {'tensors': Variable(torch.randn(4, 3, 128, 128)),'mask': Variable(torch.randn(4, 128, 128))} # one black and white 28 x 28 picture will be the input to the model
     torch.onnx.export(trained_model, dummy_input, "%s/mnist.onnx" % out_dir)
 
     # Load the ONNX file

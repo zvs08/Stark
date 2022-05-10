@@ -1,17 +1,10 @@
 import argparse
 import torch
-import _init_paths
 from lib.models.stark.repvgg import repvgg_model_convert
 from lib.models.stark import build_starkst
 from lib.config.stark_st2.config import cfg, update_config_from_file
 import torch.nn as nn
-import torch.nn.functional as F
-# for onnx conversion and inference
 import torch.onnx
-import numpy as np
-import onnx
-import onnxruntime
-import time
 import os
 from lib.test.evaluation.environment import env_settings
 from torch.utils.mobile_optimizer import optimize_for_mobile
@@ -96,10 +89,9 @@ def to_numpy(tensor):
 
 if __name__ == "__main__":
     load_checkpoint = True
-    save_name = "complete.onnx"
     # update cfg
-    args = parse_args()
-    yaml_fname = 'experiments/stark_st2/%s.yaml' % (args.config)
+    config = 'baseline'
+    yaml_fname = 'experiments/stark_st2/%s.yaml' % config
     print(yaml_fname)
     update_config_from_file(yaml_fname)
     bs = 1
@@ -111,7 +103,7 @@ if __name__ == "__main__":
         save_dir = env_settings().save_dir
         checkpoint_name = os.path.join(save_dir,
                                        "checkpoints/train/stark_st2/%s/STARKST_ep0007.pth.tar"
-                                       % (args.config))
+                                       % config)
         model.load_state_dict(torch.load(checkpoint_name, map_location='cpu')['net'], strict=True)
     # transfer to test mode
     model = repvgg_model_convert(model)
@@ -134,6 +126,7 @@ if __name__ == "__main__":
     torchscript_model = torch.jit.script(torch_model)
     torchscript_model_optimized = optimize_for_mobile(torchscript_model)
     torch.jit.save(torchscript_model_optimized, "stark_st_transformer.pt")
+    torchscript_model_optimized._save_for_lite_interpreter("stark_st_transformer.ptl")
     '''
     # get the network input
     bs = 1
