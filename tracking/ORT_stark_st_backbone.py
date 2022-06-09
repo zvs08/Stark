@@ -97,6 +97,16 @@ if __name__ == "__main__":
     #torch_outs = torch_model(img_z[0], mask_z[0])
 
 
+    torch.quantization.fuse_modules(torch_model, [['conv', 'bn', 'relu']], inplace=True)
+    model.qconfig = torch.quantization.get_default_qconfig('qnnpack')
+    torch.quantization.prepare(torch_model, inplace=True)
+    # Calibrate your model
+    def calibrate(model, calibration_data):
+        # Your calibration code here
+        return
+    calibrate(torch_model, [])
+    torch.quantization.convert(torch_model, inplace=True)
+
     torchscript_model = torch.jit.script(torch_model)
     torchscript_model_optimized = optimize_for_mobile(torchscript_model)
     #torch.jit.save(torchscript_model_optimized, "stark_st_backbone.pt")
