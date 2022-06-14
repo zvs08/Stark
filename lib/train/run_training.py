@@ -92,8 +92,8 @@ def main():
 
     args = parser.parse_args()
     if args.local_rank != -1:
-        dist.init_process_group(backend='nccl')
-        torch.cuda.set_device(args.local_rank)
+        dist.init_process_group(backend='gloo')
+        # torch.cuda.set_device(args.local_rank)
     else:
         torch.cuda.set_device(0)
     run_training(args.script, args.config, cudnn_benchmark=args.cudnn_benchmark,

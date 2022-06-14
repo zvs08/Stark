@@ -61,7 +61,8 @@ def run(settings):
         raise ValueError("illegal script name")
 
     # wrap networks to distributed one
-    net.cuda()
+    device = torch.device("mps")
+    net.to(device)
     if settings.local_rank != -1:
         net = DDP(net, device_ids=[settings.local_rank], find_unused_parameters=True)
         settings.device = torch.device("cuda:%d" % settings.local_rank)

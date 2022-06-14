@@ -1,7 +1,9 @@
 """
 STARK-ST Model (Spatio-Temporal).
 """
-from .backbone import build_backbone
+import torch
+
+from .backbone import build_backbone, Joiner, Backbone
 from .transformer import build_transformer
 from .head import build_box_head, MLP
 from lib.models.stark.stark_s import STARKS
@@ -56,6 +58,15 @@ class STARKST(STARKS):
             return out_dict, outputs_coord
         else:
             return out_dict, None
+    def fuse_model(self):
+        for m in self.modules():
+            if type(m) == Joiner:
+                for mm in m.modules():
+                    if type(m) == Backbone:
+                        print ('hui')
+                        torch.quantization.fuse_modules(mm, ['0', '1', '2'], inplace=True)
+            if type(m) == Backbone:
+                torch.quantization.fuse_modules(m.body, ['conv1', 'bn1', 'relu'], inplace=True)
 
 
 def build_starkst(cfg):

@@ -80,7 +80,7 @@ if __name__ == "__main__":
     if load_checkpoint:
         save_dir = env_settings().save_dir
         checkpoint_name = os.path.join(save_dir,
-                                       "checkpoints/train/%s/%s/STARKST_ep0007.pth.tar"
+                                       "checkpoints/train/%s/%s/STARKST_ep0006.pth.tar"
                                        % (args.script, args.config))
         model.load_state_dict(torch.load(checkpoint_name, map_location='cpu')['net'], strict=True)
     # transfer to test mode
@@ -97,8 +97,9 @@ if __name__ == "__main__":
     #torch_outs = torch_model(img_z[0], mask_z[0])
 
 
-    torch.quantization.fuse_modules(torch_model, [['conv', 'bn', 'relu']], inplace=True)
-    model.qconfig = torch.quantization.get_default_qconfig('qnnpack')
+    model.fuse_model()
+    model.qconfig = torch.quantization.default_qconfig
+    print(model.qconfig)
     torch.quantization.prepare(torch_model, inplace=True)
     # Calibrate your model
     def calibrate(model, calibration_data):
